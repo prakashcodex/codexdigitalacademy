@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register - Codex Digital Academy</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; justify-content: center; padding: 50px; background-color: #f4f4f9; }
+        .form-box { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 300px; }
+        input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
+        button { width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #218838; }
+    </style>
+</head>
+<body>
+    <div class="form-box">
+        <h2>Student Registration</h2>
+        <input type="text" id="studentName" placeholder="Full Name" required>
+        <input type="email" id="studentEmail" placeholder="Email Address" required>
+        <button onclick="enrollStudent()">Enroll Now</button>
+        <p id="msg" style="color: green; display: none; text-align: center; margin-top:10px;">Enrolled successfully! Redirecting...</p>
+    </div>
+
+    <script>
+        function enrollStudent() {
+            // Save the exact timestamp the student registered
+            localStorage.setItem('codexStartDate', Date.now());
+            document.getElementById('msg').style.display = 'block';
+            
+            // Send them to the course area after 1.5 seconds
+            setTimeout(() => { window.location.href = 'course.html'; }, 1500);
+        }
+    </script>
+</body>
+</html>

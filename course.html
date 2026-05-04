@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom LMS Video Player</title>
+    
+    <style>
+        /* [YOUR ORIGINAL CSS] */
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .header { width: 100%; max-width: 1100px; display: flex; justify-content: space-between; align-items: center; }
+        .lms-container { display: flex; flex-direction: row; gap: 20px; width: 100%; max-width: 1100px; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .video-section { flex: 2; display: flex; flex-direction: column; }
+        .video-container { position: relative; background: #000; border-radius: 8px; overflow: hidden; }
+        .iframe-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; pointer-events: none; }
+        .iframe-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .controls { display: flex; justify-content: center; gap: 15px; padding: 15px; background-color: #ffffff; border-top: 2px solid #0056b3; margin-top: -2px; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
+        .controls button { padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #0056b3; color: white; border: none; border-radius: 5px; font-weight: bold; transition: background 0.3s; }
+        .controls button:hover { background-color: #004494; }
+        .playlist-section { flex: 1; background: #f8f9fa; border: 1px solid #ddd; border-radius: 8px; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .playlist-section h3 { margin-top: 0; color: #333; border-bottom: 2px solid #0056b3; padding-bottom: 10px; }
+        .lesson-btn { padding: 12px 15px; font-size: 15px; text-align: left; cursor: pointer; background-color: #ffffff; color: #333; border: 1px solid #ccc; border-radius: 5px; transition: all 0.3s ease; }
+        .lesson-btn:hover:not(:disabled) { background-color: #e2e6ea; }
+        .lesson-btn.active { background-color: #0056b3; color: white; border-color: #0056b3; font-weight: bold; }
+
+        /* --- NEW UPGRADE STYLES --- */
+        .lesson-btn:disabled { background-color: #e9ecef; color: #6c757d; cursor: not-allowed; border-color: #ddd; }
+        .lesson-btn.completed { border-left: 5px solid #28a745; }
+        
+        .feedback-section { margin-top: 20px; padding: 20px; background: #eef7e9; border: 1px solid #c3e6cb; border-radius: 8px; display: none; }
+        .feedback-section textarea { width: 100%; padding: 10px; margin-top: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box;}
+        .submit-btn { margin-top: 10px; background: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; }
+
+        @media (max-width: 768px) { .lms-container { flex-direction: column; } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Codex Digital Academy Module</h1>
+        <a href="index.html">← Back to Hub</a>
+    </div>
+
+    <div class="lms-container">
+        <div class="video-section">
+            <div class="video-container">
+                <div class="iframe-wrapper">
+                    <div id="player"></div>
+                </div>
+                
+                <div class="controls">
+                    <button id="playPause">Play</button>
+                    <button id="skipBack">-10s</button>
+                    <button id="skipForward">+10s</button>
+                    <button id="restart">Restart</button>
+                </div>
+            </div>
+
+            <!-- Feedback Form (Hidden until video finishes) -->
+            <div class="feedback-section" id="feedbackBox">
+                <h3>🎉 Lesson Completed!</h3>
+                <p>Did you understand this module? Leave your feedback below to proceed.</p>
+                <textarea rows="3" placeholder="Type your thoughts here..."></textarea>
+                <button class="submit-btn" onclick="submitFeedback()">Submit Feedback</button>
+            </div>
+        </div>
+
+        <div class="playlist-section" id="playlist">
+            <h3>Course Modules</h3>
+            <!-- data-day sets which day the video unlocks (0 = immediately) -->
+            <button class="lesson-btn" data-vid="fOkdN8AldVc" data-day="0">Lesson 1: Introduction</button>
+            <button class="lesson-btn" data-vid="tgbNymZ7vqY" data-day="1">Lesson 2: HTML Basics</button>
+            <button class="lesson-btn" data-vid="jNQXAC9IVRw" data-day="2">Lesson 3: CSS Styling</button>
+            <button class="lesson-btn" data-vid="W6NZfCO5SIk" data-day="3">Lesson 4: JavaScript Logic</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. VERIFY REGISTRATION & CALCULATE DAYS ---
+        const startDate = localStorage.getItem('codexStartDate');
+        if (!startDate) {
+            alert("Please register first to start the clock!");
+            window.location.href = 'register.html';
+        }
+        
+        // Calculate how many days have passed since registration
+        const msPassed = Date.now() - parseInt(startDate);
+        const daysActive = Math.floor(msPassed / (1000 * 60 * 60 * 24));
+        
+        // Load completed videos from storage
+        let completedVids = JSON.parse(localStorage.getItem('codexCompleted')) || [];
+
+        // --- 2. SETUP PLAYLIST UI (DRIP & PROGRESS LOGIC) ---
+        const lessonButtons = document.querySelectorAll('.lesson-btn');
+        let currentVideoId = null;
+
+        lessonButtons.forEach(button => {
+            const unlockDay = parseInt(button.getAttribute('data-day'));
+            const vidId = button.getAttribute('data-vid');
+
+            // Check if completed
+            if (completedVids.includes(vidId)) {
+                button.classList.add('completed');
+                button.innerHTML += " ✅";
+            }
+
+            // Drip Logic: Lock future videos
+            if (unlockDay > daysActive) {
+                button.disabled = true;
+                button.innerHTML += ` 🔒 (Unlocks in ${unlockDay - daysActive} day/s)`;
+            } else if (!currentVideoId) {
+                // Set the first unlocked, uncompleted video as the active one
+                currentVideoId = vidId;
+                button.classList.add('active');
+            }
+        });
+
+        // Fallback if all are completed
+        if(!currentVideoId) {
+            currentVideoId = lessonButtons[0].getAttribute('data-vid');
+            lessonButtons[0].classList.add('active');
+        }
+
+        // --- 3. LOAD YOUTUBE API ---
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        var player;
+        
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '500', width: '800',
+                videoId: currentVideoId, 
+                playerVars: { 'playsinline': 1, 'controls': 0, 'disablekb': 1, 'fs': 1, 'rel': 0, 'modestbranding': 1 },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange // New Listener for course completion
+                }
+            });
+        }
+
+        var isPlaying = false;
+        const playPauseBtn = document.getElementById('playPause');
+        
+        function onPlayerReady(event) {
+            playPauseBtn.addEventListener('click', function() {
+                if (isPlaying) { player.pauseVideo(); this.innerText = 'Play'; } 
+                else { player.playVideo(); this.innerText = 'Pause'; }
+                isPlaying = !isPlaying;
+            });
+            document.getElementById('skipForward').addEventListener('click', () => player.seekTo(player.getCurrentTime() + 10, true));
+            document.getElementById('skipBack').addEventListener('click', () => player.seekTo(Math.max(player.getCurrentTime() - 10, 0), true));
+            document.getElementById('restart').addEventListener('click', () => { player.seekTo(0, true); player.playVideo(); playPauseBtn.innerText = 'Pause'; isPlaying = true; });
+        }
+
+        // --- 4. DETECT VIDEO END & SHOW FEEDBACK ---
+        function onPlayerStateChange(event) {
+            // YT.PlayerState.ENDED == 0
+            if (event.data === 0) {
+                // Mark as completed in storage
+                if (!completedVids.includes(currentVideoId)) {
+                    completedVids.push(currentVideoId);
+                    localStorage.setItem('codexCompleted', JSON.stringify(completedVids));
+                    
+                    // Add checkmark to current button
+                    const activeBtn = document.querySelector('.lesson-btn.active');
+                    activeBtn.classList.add('completed');
+                    if(!activeBtn.innerHTML.includes('✅')) activeBtn.innerHTML += " ✅";
+                }
+                // Show feedback box
+                document.getElementById('feedbackBox').style.display = 'block';
+                isPlaying = false;
+                playPauseBtn.innerText = 'Play';
+            }
+        }
+
+        // --- 5. SWITCHING VIDEOS ---
+        lessonButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                if (this.disabled) return;
+
+                lessonButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+
+                currentVideoId = this.getAttribute('data-vid');
+                player.loadVideoById(currentVideoId);
+                
+                isPlaying = true;
+                playPauseBtn.innerText = 'Pause';
+                document.getElementById('feedbackBox').style.display = 'none'; // Hide feedback for new video
+            });
+        });
+
+        // --- 6. HANDLE FEEDBACK SUBMISSION ---
+        function submitFeedback() {
+            alert("Feedback saved securely! Great job completing this module.");
+            document.getElementById('feedbackBox').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
