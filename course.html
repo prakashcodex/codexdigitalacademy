@@ -67,10 +67,13 @@
         <div class="playlist-section" id="playlist">
             <h3>Course Modules</h3>
             <!-- data-day sets which day the video unlocks (0 = immediately) -->
-            <button class="lesson-btn" data-vid="fOkdN8AldVc" data-day="0">Lesson 1: Introduction</button>
-            <button class="lesson-btn" data-vid="tgbNymZ7vqY" data-day="1">Lesson 2: HTML Basics</button>
-            <button class="lesson-btn" data-vid="jNQXAC9IVRw" data-day="2">Lesson 3: CSS Styling</button>
-            <button class="lesson-btn" data-vid="W6NZfCO5SIk" data-day="3">Lesson 4: JavaScript Logic</button>
+            <button class="lesson-btn" data-vid="eWH9TQ7mPoE" data-day="0">Lesson 1: Mindset Devlopment</button>
+            <button class="lesson-btn" data-vid="Cx3-ZZit1Os" data-day="1">Lesson 2: Skill Development</button>
+            <button class="lesson-btn" data-vid="jNQXAC9IVRw" data-day="2">Lesson 3: Momentum Building</button>
+            <button class="lesson-btn" data-vid="02hj60EaGoU" data-day="3">Lesson 4: Leadership Skill</button>
+            <button class="lesson-btn" data-vid="Jg2wkMdTPMU" data-day="3">Lesson 5: Action Plan</button>
+            <button class="lesson-btn" data-vid="4V_MVhyxsBg" data-day="3">Lesson 6: Sucess Principles </button>
+            <button class="lesson-btn" data-vid="O_ZIm-J4V1U" data-day="3">Lesson 7: The Cutting Edge Factor</button>
         </div>
     </div>
 
@@ -84,7 +87,7 @@
         
         // Calculate how many days have passed since registration
         const msPassed = Date.now() - parseInt(startDate);
-        const daysActive = Math.floor(msPassed / (1000 * 60 * 60 * 24));
+        const daysActive = Math.floor(msPassed / (60));
         
         // Load completed videos from storage
         let completedVids = JSON.parse(localStorage.getItem('codexCompleted')) || [];
@@ -118,7 +121,7 @@
         if(!currentVideoId) {
             currentVideoId = lessonButtons[0].getAttribute('data-vid');
             lessonButtons[0].classList.add('active');
-        }
+]        }
 
         // --- 3. LOAD YOUTUBE API ---
         var tag = document.createElement('script');
@@ -166,7 +169,7 @@
                     // Add checkmark to current button
                     const activeBtn = document.querySelector('.lesson-btn.active');
                     activeBtn.classList.add('completed');
-                    if(!activeBtn.innerHTML.includes('✅')) activeBtn.innerHTML += " ✅";
+                   if(!activeBtn.innerHTML.includes('✅')) activeBtn.innerHTML += " ✅";
                 }
                 // Show feedback box
                 document.getElementById('feedbackBox').style.display = 'block';
