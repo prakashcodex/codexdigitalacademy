@@ -3,182 +3,836 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Custom LMS Video Player</title>
-    
+    <title>Course Modules - Codex Digital Academy</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Netlify Identity Widget -->
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
     <style>
-        /* [YOUR ORIGINAL CSS] */
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .header { width: 100%; max-width: 1100px; display: flex; justify-content: space-between; align-items: center; }
-        .lms-container { display: flex; flex-direction: row; gap: 20px; width: 100%; max-width: 1100px; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .video-section { flex: 2; display: flex; flex-direction: column; }
-        .video-container { position: relative; background: #000; border-radius: 8px; overflow: hidden; }
-        .iframe-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; pointer-events: none; }
-        .iframe-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-        .controls { display: flex; justify-content: center; gap: 15px; padding: 15px; background-color: #ffffff; border-top: 2px solid #0056b3; margin-top: -2px; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
-        .controls button { padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #0056b3; color: white; border: none; border-radius: 5px; font-weight: bold; transition: background 0.3s; }
-        .controls button:hover { background-color: #004494; }
-        .playlist-section { flex: 1; background: #f8f9fa; border: 1px solid #ddd; border-radius: 8px; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .playlist-section h3 { margin-top: 0; color: #333; border-bottom: 2px solid #0056b3; padding-bottom: 10px; }
-        .lesson-btn { padding: 12px 15px; font-size: 15px; text-align: left; cursor: pointer; background-color: #ffffff; color: #333; border: 1px solid #ccc; border-radius: 5px; transition: all 0.3s ease; }
-        .lesson-btn:hover:not(:disabled) { background-color: #e2e6ea; }
-        .lesson-btn.active { background-color: #0056b3; color: white; border-color: #0056b3; font-weight: bold; }
+        :root {
+            --primary: #ea580c; /* Rich Orange */
+            --primary-hover: #c2410c;
+            --primary-light: #ffedd5;
+            --accent: #f97316;
+            --bg-light: #fff7ed;
+            --card-bg: #ffffff;
+            --card-border: #fed7aa;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --shadow-orange: rgba(234, 88, 12, 0.12);
+        }
 
-        /* --- NEW UPGRADE STYLES --- */
-        .lesson-btn:disabled { background-color: #e9ecef; color: #6c757d; cursor: not-allowed; border-color: #ddd; }
-        .lesson-btn.completed { border-left: 5px solid #28a745; }
-        
-        .feedback-section { margin-top: 20px; padding: 20px; background: #eef7e9; border: 1px solid #c3e6cb; border-radius: 8px; display: none; }
-        .feedback-section textarea { width: 100%; padding: 10px; margin-top: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box;}
-        .submit-btn { margin-top: 10px; background: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+        }
 
-        @media (max-width: 768px) { .lms-container { flex-direction: column; } }
+        body {
+            background-color: var(--bg-light);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(249, 115, 22, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(234, 88, 12, 0.08) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 40px;
+        }
+
+        /* Header Navigation */
+        header {
+            width: 100%;
+            padding: 16px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--card-border);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 10px rgba(234, 88, 12, 0.05);
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .logo span { color: var(--text-dark); }
+
+        .user-nav-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-badge {
+            background: var(--primary-light);
+            border: 1px solid var(--card-border);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.88rem;
+            color: var(--primary);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-nav {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+            background: #ffffff;
+            color: var(--text-dark);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-nav:hover {
+            background: var(--primary-light);
+            border-color: var(--accent);
+            color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        /* Main LMS Container */
+        .lms-wrapper {
+            max-width: 1200px;
+            width: 95%;
+            margin: 30px auto 0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .lms-container {
+            display: flex;
+            flex-direction: row;
+            gap: 25px;
+            width: 100%;
+        }
+
+        @media (max-width: 900px) {
+            .lms-container {
+                flex-direction: column;
+            }
+        }
+
+        /* Video Player Section */
+        .video-section {
+            flex: 2.2;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .video-card {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px var(--shadow-orange);
+            position: relative;
+        }
+
+        .iframe-wrapper {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .iframe-wrapper iframe, .iframe-wrapper #player {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        /* Top Overlay to obscure any YouTube branding top bar */
+        .yt-branding-shield {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 48px;
+            z-index: 10;
+            pointer-events: none;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 100%);
+        }
+
+        /* Controls Bar (Non-skippable setup) */
+        .controls-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 24px;
+            background: #ffffff;
+            border-top: 1px solid var(--card-border);
+            flex-wrap: wrap;
+        }
+
+        .controls-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-control {
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            background: #ffffff;
+            color: var(--text-dark);
+            border: 1.5px solid var(--card-border);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-control:hover {
+            background: var(--primary-light);
+            border-color: var(--accent);
+            color: var(--primary);
+        }
+
+        .btn-control.primary-btn {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px var(--shadow-orange);
+        }
+
+        .btn-control.primary-btn:hover {
+            opacity: 0.95;
+            transform: scale(1.02);
+            color: white;
+        }
+
+        .non-skippable-tag {
+            font-size: 0.82rem;
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid var(--card-border);
+        }
+
+        /* Current Video Meta */
+        .video-meta {
+            padding: 22px;
+            background: var(--card-bg);
+            border: 1.5px solid var(--card-border);
+            border-radius: 16px;
+            box-shadow: 0 4px 15px var(--shadow-orange);
+        }
+
+        .video-meta h2 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+            color: var(--primary);
+        }
+
+        .video-meta p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Playlist Sidebar */
+        .playlist-section {
+            flex: 1;
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 20px;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 10px 30px var(--shadow-orange);
+            max-height: 640px;
+            overflow-y: auto;
+        }
+
+        .playlist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 14px;
+            margin-bottom: 5px;
+        }
+
+        .playlist-header h3 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--text-dark);
+        }
+
+        .progress-indicator {
+            font-size: 0.85rem;
+            background: #dcfce7;
+            color: #166534;
+            padding: 4px 12px;
+            border-radius: 14px;
+            font-weight: 700;
+        }
+
+        .lock-status-btn {
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 1px solid var(--card-border);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .lock-status-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .lesson-btn {
+            padding: 15px 16px;
+            font-size: 0.95rem;
+            text-align: left;
+            cursor: pointer;
+            background: #fffdfa;
+            color: var(--text-dark);
+            border: 1.5px solid var(--card-border);
+            border-radius: 12px;
+            transition: all 0.25s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            line-height: 1.4;
+            font-weight: 600;
+        }
+
+        .lesson-btn:hover {
+            background: var(--primary-light);
+            border-color: var(--accent);
+            transform: translateX(4px);
+        }
+
+        .lesson-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-color: var(--primary);
+            font-weight: 700;
+            color: #ffffff;
+            box-shadow: 0 4px 15px var(--shadow-orange);
+        }
+
+        .lesson-btn.active .status-icon {
+            color: white !important;
+        }
+
+        .lesson-btn.completed {
+            border-left: 5px solid #10b981;
+        }
+
+        /* Feedback Card */
+        .feedback-card {
+            background: #f0fdf4;
+            border: 2px solid #bbf7d0;
+            border-radius: 16px;
+            padding: 22px;
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feedback-card h3 {
+            color: #166534;
+            font-size: 1.15rem;
+            margin-bottom: 6px;
+            font-weight: 800;
+        }
+
+        .feedback-card p {
+            color: #374151;
+            font-size: 0.92rem;
+            margin-bottom: 14px;
+        }
+
+        .feedback-card textarea {
+            width: 100%;
+            padding: 12px;
+            background: #ffffff;
+            border: 1.5px solid #86efac;
+            border-radius: 10px;
+            color: var(--text-dark);
+            font-size: 0.92rem;
+            resize: vertical;
+            outline: none;
+        }
+
+        .feedback-card textarea:focus {
+            border-color: #16a34a;
+        }
+
+        .btn-feedback {
+            margin-top: 12px;
+            background: #16a34a;
+            color: white;
+            padding: 11px 22px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-feedback:hover {
+            background: #15803d;
+            transform: translateY(-1px);
+        }
+
+        /* Auth Modal Fallback */
+        .auth-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255, 247, 237, 0.92);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .auth-modal {
+            background: #ffffff;
+            border: 2px solid var(--card-border);
+            padding: 38px;
+            border-radius: 20px;
+            max-width: 440px;
+            text-align: center;
+            box-shadow: 0 20px 50px var(--shadow-orange);
+        }
+
+        .auth-modal h2 {
+            font-size: 1.6rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        .auth-modal p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+        }
+
+        .auth-modal-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Codex Digital Academy Module</h1>
-        <a href="index.html">← Back to Hub</a>
-    </div>
 
-    <div class="lms-container">
-        <div class="video-section">
-            <div class="video-container">
-                <div class="iframe-wrapper">
-                    <div id="player"></div>
+    <!-- Header Navigation -->
+    <header>
+        <a href="index.html" class="logo">
+            📙 Codex <span>Digital Academy</span>
+        </a>
+        <div class="user-nav-profile">
+            <div class="user-badge" id="userBadge">
+                👤 Student
+            </div>
+            <a href="index.html" class="btn-nav">← Hub</a>
+            <a href="admin.html" class="btn-nav">📊 Admin</a>
+            <button class="btn-nav" id="authWidgetBtn" onclick="triggerAuthAction()">Netlify Login</button>
+        </div>
+    </header>
+
+    <!-- Main LMS Layout -->
+    <div class="lms-wrapper">
+        <div class="lms-container">
+            
+            <!-- Video Player Column -->
+            <div class="video-section">
+                <div class="video-card">
+                    <div class="yt-branding-shield"></div>
+                    <div class="iframe-wrapper">
+                        <div id="player"></div>
+                    </div>
+                    
+                    <!-- Player Controls -->
+                    <div class="controls-bar">
+                        <div class="controls-group">
+                            <button class="btn-control primary-btn" id="playPause">▶ Play</button>
+                            <button class="btn-control" id="skipBack">⏪ -10s</button>
+                            <button class="btn-control" id="restart">🔄 Restart</button>
+                        </div>
+                        <div class="non-skippable-tag">
+                            🛡️ Non-Skippable Player (HD Forced)
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="controls">
-                    <button id="playPause">Play</button>
-                    <button id="skipBack">-10s</button>
-                    <button id="skipForward">+10s</button>
-                    <button id="restart">Restart</button>
+
+                <!-- Video Title & Meta -->
+                <div class="video-meta">
+                    <h2 id="activeVideoTitle">Lesson 1: Mindset Development</h2>
+                    <p id="activeVideoSubtitle">Master the foundational mindset for digital development and career growth.</p>
+                </div>
+
+                <!-- Feedback Form (Revealed upon video completion) -->
+                <div class="feedback-card" id="feedbackBox">
+                    <h3>🎉 Lesson Completed!</h3>
+                    <p>Awesome progress! Provide your feedback or key takeaway to log completion.</p>
+                    <textarea id="feedbackText" rows="3" placeholder="Share your key takeaways from this module..."></textarea>
+                    <button class="btn-feedback" onclick="submitFeedback()">Save & Submit Feedback</button>
                 </div>
             </div>
 
-            <!-- Feedback Form (Hidden until video finishes) -->
-            <div class="feedback-section" id="feedbackBox">
-                <h3>🎉 Lesson Completed!</h3>
-                <p>Did you understand this module? Leave your feedback below to proceed.</p>
-                <textarea rows="3" placeholder="Type your thoughts here..."></textarea>
-                <button class="submit-btn" onclick="submitFeedback()">Submit Feedback</button>
+            <!-- Playlist Column -->
+            <div class="playlist-section" id="playlist">
+                <div class="playlist-header">
+                    <h3>Course Modules</h3>
+                    <div class="progress-indicator" id="progressIndicator">0 / 7 Done</div>
+                </div>
+
+                <!-- Drip Mode Header -->
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 5px;">
+                    <span style="font-size:0.82rem; font-weight:700; color:var(--primary);" id="dripStatusText">📅 Drip Mode: Day 1 Active</span>
+                    <button class="lock-status-btn" onclick="toggleLockMode()" id="lockToggleBtn">Mode: Drip Lock 🔒</button>
+                </div>
+
+                <!-- Lesson Buttons with Progressive Drip Days (0 to 6) -->
+                <button class="lesson-btn" data-vid="eWH9TQ7mPoE" data-day="0" data-title="Lesson 1: Mindset Development">
+                    <span>1. Mindset Development</span>
+                    <span class="status-icon" style="color:var(--primary);">▶</span>
+                </button>
+                <button class="lesson-btn" data-vid="Cx3-ZZit1Os" data-day="1" data-title="Lesson 2: Skill Development">
+                    <span>2. Skill Development</span>
+                    <span class="status-icon" style="color:var(--primary);">▶</span>
+                </button>
+                <button class="lesson-btn" data-vid="02hj60EaGoU" data-day="2" data-title="Lesson 3: Momentum Building">
+                    <span>3. Momentum Building</span>
+                    <span class="status-icon" style="color:var(--primary);">▶</span>
+                </button>
+                <button class="lesson-btn" data-vid="Jg2wkMdTPMU" data-day="3" data-title="Lesson 4: Leadership Skill">
+                    <span>4. Leadership Skill</span>
+                    <span class="status-icon" style="color:var(--primary);">▶</span>
+                </button>
+                <button class="lesson-btn" data-vid="4V_MVhyxsBg" data-day="4" data-title="Lesson 5: Action Plan">
+                    <span>5. Action Plan</span>
+                    <span class="status-icon" style="color:var(--primary);">▶</span>
+                </button>
+                <button class="lesson-btn" data-vid="k825543DAm4" data-day="5" data-title="Lesson 6: Success Principles">
+                    <span>6. Success Principles</span>
+                    <span class="status-icon" style="color:var(--primary);">▶</span>
+                </button>
+                <button class="lesson-btn" data-vid="O_ZIm-J4V1U" data-day="6" data-title="Lesson 7: The Cutting Edge Factor">
+                    <span>7. The Cutting Edge Factor</span>
+                    <span class="status-icon" style="color:var(--primary);">▶</span>
+                </button>
             </div>
         </div>
+    </div>
 
-        <div class="playlist-section" id="playlist">
-            <h3>Course Modules</h3>
-            <!-- data-day sets which day the video unlocks (0 = immediately) -->
-            <button class="lesson-btn" data-vid="eWH9TQ7mPoE" data-day="0">Lesson 1: Mindset Devlopment</button>
-            <button class="lesson-btn" data-vid="Cx3-ZZit1Os" data-day="1">Lesson 2: Skill Development</button>
-            <button class="lesson-btn" data-vid="jNQXAC9IVRw" data-day="2">Lesson 3: Momentum Building</button>
-            <button class="lesson-btn" data-vid="02hj60EaGoU" data-day="3">Lesson 4: Leadership Skill</button>
-            <button class="lesson-btn" data-vid="Jg2wkMdTPMU" data-day="3">Lesson 5: Action Plan</button>
-            <button class="lesson-btn" data-vid="4V_MVhyxsBg" data-day="3">Lesson 6: Sucess Principles </button>
-            <button class="lesson-btn" data-vid="O_ZIm-J4V1U" data-day="3">Lesson 7: The Cutting Edge Factor</button>
+    <!-- Auth Requirement Overlay Modal -->
+    <div class="auth-overlay" id="authModal">
+        <div class="auth-modal">
+            <h2>Authentication Required</h2>
+            <p>Please register on the home page or log in with Netlify Identity to access your course modules.</p>
+            <div class="auth-modal-btns">
+                <a href="index.html" class="btn-control primary-btn" style="text-decoration: none; justify-content: center;">Register Now on Main Form</a>
+                <button class="btn-control" onclick="netlifyIdentity.open('login')" style="justify-content: center;">Log In with Netlify Identity</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // --- 1. VERIFY REGISTRATION & CALCULATE DAYS ---
-        const startDate = localStorage.getItem('codexStartDate');
-        if (!startDate) {
-            alert("Please register first to start the clock!");
-            window.location.href = 'register.html';
+        // --- 1. AUTHENTICATION & USER MANAGEMENT ---
+        let activeUser = null;
+        const startDateRaw = localStorage.getItem('codexStartDate');
+
+        function checkAccessAndUser() {
+            const localUserRaw = localStorage.getItem('codexUser');
+            
+            if (window.netlifyIdentity && window.netlifyIdentity.currentUser()) {
+                const nUser = window.netlifyIdentity.currentUser();
+                activeUser = {
+                    name: nUser.user_metadata?.full_name || nUser.email.split('@')[0],
+                    email: nUser.email
+                };
+            } else if (localUserRaw) {
+                try { activeUser = JSON.parse(localUserRaw); } catch(e){}
+            }
+
+            if (!activeUser && !startDateRaw) {
+                document.getElementById('authModal').style.display = 'flex';
+            } else {
+                document.getElementById('authModal').style.display = 'none';
+                const userName = activeUser ? activeUser.name : 'Registered Student';
+                document.getElementById('userBadge').innerHTML = `👤 ${userName}`;
+                
+                const authBtn = document.getElementById('authWidgetBtn');
+                if (window.netlifyIdentity && window.netlifyIdentity.currentUser()) {
+                    authBtn.innerText = 'Log Out';
+                } else {
+                    authBtn.innerText = 'Netlify Identity';
+                }
+            }
         }
-        
-        // Calculate how many days have passed since registration
-        const msPassed = Date.now() - parseInt(startDate);
-        const daysActive = Math.floor(msPassed / (60));
-        
-        // Load completed videos from storage
+
+        function triggerAuthAction() {
+            if (window.netlifyIdentity) {
+                if (window.netlifyIdentity.currentUser()) {
+                    window.netlifyIdentity.logout();
+                } else {
+                    window.netlifyIdentity.open('login');
+                }
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Progress Tracking
         let completedVids = JSON.parse(localStorage.getItem('codexCompleted')) || [];
 
-        // --- 2. SETUP PLAYLIST UI (DRIP & PROGRESS LOGIC) ---
+        // --- 2. DRIP SCHEDULE & PLAYLIST MANAGEMENT ---
         const lessonButtons = document.querySelectorAll('.lesson-btn');
         let currentVideoId = null;
+        let activeLessonTitle = "Lesson 1: Mindset Development";
+        let isDripLocked = true; // Drip mode locked by default as requested
 
-        lessonButtons.forEach(button => {
-            const unlockDay = parseInt(button.getAttribute('data-day'));
-            const vidId = button.getAttribute('data-vid');
+        // Calculate Drip Days Passed (1 day = 86,400,000 ms)
+        function getDaysActive() {
+            const startDate = startDateRaw ? parseInt(startDateRaw) : Date.now();
+            const msPassed = Date.now() - startDate;
+            return Math.floor(msPassed / (1000 * 60 * 60 * 24));
+        }
 
-            // Check if completed
-            if (completedVids.includes(vidId)) {
-                button.classList.add('completed');
-                button.innerHTML += " ✅";
+        function updatePlaylistUI() {
+            let activeSet = false;
+            let completedCount = 0;
+            const daysActive = getDaysActive();
+
+            document.getElementById('dripStatusText').innerText = isDripLocked 
+                ? `📅 Drip Active: Day ${daysActive + 1}`
+                : `🔓 All Lessons Unlocked`;
+
+            lessonButtons.forEach(button => {
+                const vidId = button.getAttribute('data-vid');
+                const title = button.getAttribute('data-title');
+                const unlockDay = parseInt(button.getAttribute('data-day'));
+                const iconSpan = button.querySelector('.status-icon');
+
+                // Drip Lock Logic
+                if (isDripLocked && unlockDay > daysActive) {
+                    button.disabled = true;
+                    const daysLeft = unlockDay - daysActive;
+                    if (iconSpan) iconSpan.innerText = `🔒 Day ${unlockDay + 1}`;
+                    button.title = `Unlocks in ${daysLeft} day(s)`;
+                } else {
+                    button.disabled = false;
+                    if (iconSpan) iconSpan.innerText = '▶';
+                }
+
+                // Completion status
+                if (completedVids.includes(vidId)) {
+                    button.classList.add('completed');
+                    if (iconSpan) iconSpan.innerText = '✅';
+                    completedCount++;
+                } else {
+                    button.classList.remove('completed');
+                }
+
+                // Set initial active video to first unlocked lesson
+                if (!activeSet && !button.disabled) {
+                    currentVideoId = vidId;
+                    activeLessonTitle = title;
+                    button.classList.add('active');
+                    activeSet = true;
+                }
+            });
+
+            if (!currentVideoId && lessonButtons.length > 0) {
+                currentVideoId = lessonButtons[0].getAttribute('data-vid');
+                lessonButtons[0].classList.add('active');
             }
 
-            // Drip Logic: Lock future videos
-            if (unlockDay > daysActive) {
-                button.disabled = true;
-                button.innerHTML += ` 🔒 (Unlocks in ${unlockDay - daysActive} day/s)`;
-            } else if (!currentVideoId) {
-                // Set the first unlocked, uncompleted video as the active one
-                currentVideoId = vidId;
-                button.classList.add('active');
-            }
-        });
+            document.getElementById('progressIndicator').innerText = `${completedCount} / ${lessonButtons.length} Done`;
+            document.getElementById('activeVideoTitle').innerText = activeLessonTitle;
+        }
 
-        // Fallback if all are completed
-        if(!currentVideoId) {
-            currentVideoId = lessonButtons[0].getAttribute('data-vid');
-            lessonButtons[0].classList.add('active');
-]        }
+        function toggleLockMode() {
+            isDripLocked = !isDripLocked;
+            document.getElementById('lockToggleBtn').innerText = isDripLocked ? "Mode: Drip Lock 🔒" : "Mode: Unlocked All 🔓";
+            updatePlaylistUI();
+        }
 
-        // --- 3. LOAD YOUTUBE API ---
+        updatePlaylistUI();
+
+        // --- 3. YOUTUBE IFRAME API WITH NON-SKIPPABLE & HIGHEST QUALITY ---
         var tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         var firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
         var player;
-        
+        var isPlaying = false;
+        var maxWatchedTime = 0;
+        const playPauseBtn = document.getElementById('playPause');
+
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
-                height: '500', width: '800',
-                videoId: currentVideoId, 
-                playerVars: { 'playsinline': 1, 'controls': 0, 'disablekb': 1, 'fs': 1, 'rel': 0, 'modestbranding': 1 },
+                height: '100%',
+                width: '100%',
+                videoId: currentVideoId,
+                playerVars: {
+                    'controls': 0, // Hides scrubber bar to prevent fast forward skipping
+                    'modestbranding': 1, // Hides YouTube logo
+                    'rel': 0, // Related videos at end from same channel only
+                    'fs': 0,
+                    'iv_load_policy': 3,
+                    'disablekb': 1,
+                    'playsinline': 1
+                },
                 events: {
                     'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange // New Listener for course completion
+                    'onStateChange': onPlayerStateChange
                 }
             });
         }
 
-        var isPlaying = false;
-        const playPauseBtn = document.getElementById('playPause');
-        
-        function onPlayerReady(event) {
-            playPauseBtn.addEventListener('click', function() {
-                if (isPlaying) { player.pauseVideo(); this.innerText = 'Play'; } 
-                else { player.playVideo(); this.innerText = 'Pause'; }
-                isPlaying = !isPlaying;
-            });
-            document.getElementById('skipForward').addEventListener('click', () => player.seekTo(player.getCurrentTime() + 10, true));
-            document.getElementById('skipBack').addEventListener('click', () => player.seekTo(Math.max(player.getCurrentTime() - 10, 0), true));
-            document.getElementById('restart').addEventListener('click', () => { player.seekTo(0, true); player.playVideo(); playPauseBtn.innerText = 'Pause'; isPlaying = true; });
-        }
-
-        // --- 4. DETECT VIDEO END & SHOW FEEDBACK ---
-        function onPlayerStateChange(event) {
-            // YT.PlayerState.ENDED == 0
-            if (event.data === 0) {
-                // Mark as completed in storage
-                if (!completedVids.includes(currentVideoId)) {
-                    completedVids.push(currentVideoId);
-                    localStorage.setItem('codexCompleted', JSON.stringify(completedVids));
-                    
-                    // Add checkmark to current button
-                    const activeBtn = document.querySelector('.lesson-btn.active');
-                    activeBtn.classList.add('completed');
-                   if(!activeBtn.innerHTML.includes('✅')) activeBtn.innerHTML += " ✅";
-                }
-                // Show feedback box
-                document.getElementById('feedbackBox').style.display = 'block';
-                isPlaying = false;
-                playPauseBtn.innerText = 'Play';
+        function forceHighestQuality() {
+            if (player && typeof player.setPlaybackQuality === 'function') {
+                try {
+                    player.setPlaybackQuality('hd1080');
+                    if (typeof player.getAvailableQualityLevels === 'function') {
+                        const qualities = player.getAvailableQualityLevels();
+                        if (qualities && Array.isArray(qualities) && qualities.length > 0) {
+                            player.setPlaybackQuality(qualities[0]); // Force highest available
+                        }
+                    }
+                } catch(e) {}
             }
         }
 
-        // --- 5. SWITCHING VIDEOS ---
+        function onPlayerReady(event) {
+            forceHighestQuality();
+            trackLessonView(currentVideoId, activeLessonTitle);
+
+            // Custom Non-skippable controls
+            playPauseBtn.addEventListener('click', function() {
+                if (!player) return;
+                const state = player.getPlayerState();
+                if (state === YT.PlayerState.PLAYING) {
+                    player.pauseVideo();
+                    this.innerText = '▶ Play';
+                    isPlaying = false;
+                } else {
+                    player.playVideo();
+                    forceHighestQuality();
+                    this.innerText = '⏸ Pause';
+                    isPlaying = true;
+                }
+            });
+
+            document.getElementById('skipBack').addEventListener('click', () => {
+                if (player && typeof player.getCurrentTime === 'function') {
+                    player.seekTo(Math.max(player.getCurrentTime() - 10, 0), true);
+                }
+            });
+
+            document.getElementById('restart').addEventListener('click', () => {
+                if (player && typeof player.seekTo === 'function') {
+                    maxWatchedTime = 0;
+                    player.seekTo(0, true);
+                    player.playVideo();
+                    forceHighestQuality();
+                    playPauseBtn.innerText = '⏸ Pause';
+                    isPlaying = true;
+                }
+            });
+
+            // Enforce Non-Skippable Guard: prevent seeking forward past maxWatchedTime
+            setInterval(() => {
+                if (player && isPlaying && typeof player.getCurrentTime === 'function') {
+                    const curr = player.getCurrentTime();
+                    if (curr > maxWatchedTime + 2.5) {
+                        // User attempted forward skip! Seek back to highest watched timestamp
+                        player.seekTo(maxWatchedTime, true);
+                    } else {
+                        maxWatchedTime = Math.max(maxWatchedTime, curr);
+                    }
+                }
+            }, 300);
+        }
+
+        function onPlayerStateChange(event) {
+            forceHighestQuality();
+
+            if (event.data === YT.PlayerState.PLAYING) {
+                playPauseBtn.innerText = '⏸ Pause';
+                isPlaying = true;
+            } else if (event.data === YT.PlayerState.PAUSED) {
+                playPauseBtn.innerText = '▶ Play';
+                isPlaying = false;
+            } else if (event.data === YT.PlayerState.ENDED) {
+                playPauseBtn.innerText = '▶ Play';
+                isPlaying = false;
+                
+                // Mark video completed
+                if (!completedVids.includes(currentVideoId)) {
+                    completedVids.push(currentVideoId);
+                    localStorage.setItem('codexCompleted', JSON.stringify(completedVids));
+                    updatePlaylistUI();
+                }
+
+                // Show Feedback Card
+                document.getElementById('feedbackBox').style.display = 'block';
+            }
+        }
+
+        // Track course view counts in localStorage for admin panel
+        function trackLessonView(vidId, title) {
+            let views = JSON.parse(localStorage.getItem('codexCourseViews')) || {};
+            views[vidId] = (views[vidId] || 0) + 1;
+            localStorage.setItem('codexCourseViews', JSON.stringify(views));
+        }
+
+        // --- 4. SWITCHING LESSON VIDEOS ---
         lessonButtons.forEach(button => {
             button.addEventListener('click', function() {
                 if (this.disabled) return;
@@ -187,19 +841,45 @@
                 this.classList.add('active');
 
                 currentVideoId = this.getAttribute('data-vid');
-                player.loadVideoById(currentVideoId);
+                activeLessonTitle = this.getAttribute('data-title');
+                document.getElementById('activeVideoTitle').innerText = activeLessonTitle;
+
+                maxWatchedTime = 0; // Reset max watched time for new video
+                trackLessonView(currentVideoId, activeLessonTitle);
+
+                if (player && typeof player.loadVideoById === 'function') {
+                    player.loadVideoById(currentVideoId);
+                    player.playVideo();
+                    forceHighestQuality();
+                    playPauseBtn.innerText = '⏸ Pause';
+                    isPlaying = true;
+                }
                 
-                isPlaying = true;
-                playPauseBtn.innerText = 'Pause';
-                document.getElementById('feedbackBox').style.display = 'none'; // Hide feedback for new video
+                document.getElementById('feedbackBox').style.display = 'none';
             });
         });
 
-        // --- 6. HANDLE FEEDBACK SUBMISSION ---
+        // --- 5. FEEDBACK SUBMISSION ---
         function submitFeedback() {
-            alert("Feedback saved securely! Great job completing this module.");
+            const feedbackText = document.getElementById('feedbackText').value;
+            alert("Feedback saved! Great work completing this lesson module.");
             document.getElementById('feedbackBox').style.display = 'none';
+            document.getElementById('feedbackText').value = '';
         }
+
+        // Netlify Identity Hooks
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAccessAndUser();
+            if (window.netlifyIdentity) {
+                window.netlifyIdentity.on("init", checkAccessAndUser);
+                window.netlifyIdentity.on("login", user => {
+                    checkAccessAndUser();
+                    window.netlifyIdentity.close();
+                });
+                window.netlifyIdentity.on("logout", checkAccessAndUser);
+            }
+        });
     </script>
 </body>
 </html>
+

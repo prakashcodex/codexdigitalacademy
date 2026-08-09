@@ -2,33 +2,228 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Register - Codex Digital Academy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration - Codex Digital Academy</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Netlify Identity Widget -->
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
     <style>
-        body { font-family: Arial, sans-serif; display: flex; justify-content: center; padding: 50px; background-color: #f4f4f9; }
-        .form-box { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 300px; }
-        input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
-        button { width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #218838; }
+        :root {
+            --primary: #ea580c; /* Rich Orange */
+            --primary-hover: #c2410c;
+            --primary-light: #ffedd5;
+            --accent: #f97316;
+            --bg-light: #fff7ed;
+            --card-bg: #ffffff;
+            --card-border: #fed7aa;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --shadow-orange: rgba(234, 88, 12, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(249, 115, 22, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(234, 88, 12, 0.08) 0px, transparent 50%);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .form-box {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 20px;
+            padding: 38px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 12px 35px var(--shadow-orange);
+        }
+
+        .form-box h2 {
+            font-size: 1.7rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+            color: var(--primary);
+        }
+
+        .form-box p.subtitle {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background: #fffdfa;
+            border: 1.5px solid #fed7aa;
+            border-radius: 10px;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+            background: #ffffff;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.02rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px var(--shadow-orange);
+        }
+
+        .btn-submit:hover {
+            opacity: 0.95;
+            transform: translateY(-2px);
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.92rem;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
     </style>
 </head>
 <body>
+
     <div class="form-box">
         <h2>Student Registration</h2>
-        <input type="text" id="studentName" placeholder="Full Name" required>
-        <input type="email" id="studentEmail" placeholder="Email Address" required>
-        <button onclick="enrollStudent()">Enroll Now</button>
-        <p id="msg" style="color: green; display: none; text-align: center; margin-top:10px;">Enrolled successfully! Redirecting...</p>
+        <p class="subtitle">Enter your 5 details to register & access all 7 LMS modules.</p>
+
+        <!-- Netlify Form -->
+        <form name="course-registration" 
+              method="POST" 
+              data-netlify="true" 
+              netlify-honeypot="bot-field" 
+              id="registerForm" 
+              action="course.html"
+              onsubmit="submitRegistration(event)">
+
+            <!-- Hidden Honeypot & Form Name -->
+            <p style="display:none;">
+                <label>Don’t fill this out: <input name="bot-field" /></label>
+            </p>
+            <input type="hidden" name="form-name" value="course-registration" />
+
+            <div class="form-group">
+                <label for="regName">Full Name *</label>
+                <input type="text" id="regName" name="name" class="form-control" placeholder="Full Name" required />
+            </div>
+
+            <div class="form-group">
+                <label for="regEmail">Email Address *</label>
+                <input type="email" id="regEmail" name="email" class="form-control" placeholder="Email Address" required />
+            </div>
+
+            <div class="form-group">
+                <label for="regPhone">Phone Number *</label>
+                <input type="tel" id="regPhone" name="phone" class="form-control" placeholder="Phone Number" required />
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="regProfession">Profession *</label>
+                    <input type="text" id="regProfession" name="profession" class="form-control" placeholder="Profession" required />
+                </div>
+                <div class="form-group">
+                    <label for="regAge">Age *</label>
+                    <input type="number" id="regAge" name="age" class="form-control" placeholder="Age" min="10" max="100" required />
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">Enroll & Access Course Now ⚡</button>
+        </form>
+
+        <a href="index.html" class="back-link">← Return to Main Page</a>
     </div>
 
     <script>
-        function enrollStudent() {
-            // Save the exact timestamp the student registered
+        function submitRegistration(e) {
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const phone = document.getElementById('regPhone').value;
+            const profession = document.getElementById('regProfession').value;
+            const age = document.getElementById('regAge').value;
+
+            const userData = {
+                name, email, phone, profession, age,
+                registeredAt: Date.now()
+            };
+
+            localStorage.setItem('codexUser', JSON.stringify(userData));
             localStorage.setItem('codexStartDate', Date.now());
-            document.getElementById('msg').style.display = 'block';
-            
-            // Send them to the course area after 1.5 seconds
-            setTimeout(() => { window.location.href = 'course.html'; }, 1500);
+
+            const form = e.target;
+            const formData = new FormData(form);
+
+            fetch("/", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams(formData).toString()
+            }).then(() => {
+                window.location.href = "course.html";
+            }).catch(() => {
+                window.location.href = "course.html";
+            });
+
+            e.preventDefault();
         }
     </script>
 </body>
 </html>
+

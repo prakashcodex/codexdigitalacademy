@@ -3,21 +3,536 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Codex Digital Academy - Home</title>
+    <title>Codex Digital Academy - Master Digital Skills</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Netlify Identity Widget -->
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f9; padding: 50px; }
-        .card { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
-        h1 { color: #0056b3; }
-        a.btn { display: inline-block; margin: 10px; padding: 15px 25px; text-decoration: none; background: #0056b3; color: white; border-radius: 5px; font-weight: bold; transition: 0.3s; }
-        a.btn:hover { background: #004494; }
+        :root {
+            --primary: #ea580c; /* Rich Orange */
+            --primary-hover: #c2410c;
+            --primary-light: #ffedd5;
+            --accent: #f97316;
+            --bg-light: #fff7ed;
+            --card-bg: #ffffff;
+            --card-border: #fed7aa;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --shadow-orange: rgba(234, 88, 12, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(249, 115, 22, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(234, 88, 12, 0.08) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigation Header */
+        header {
+            width: 100%;
+            padding: 18px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--card-border);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 10px rgba(234, 88, 12, 0.05);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--text-dark);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-auth {
+            padding: 9px 18px;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+            background: #ffffff;
+            color: var(--text-dark);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.92rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-auth:hover {
+            background: var(--primary-light);
+            border-color: var(--accent);
+            color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            padding: 11px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.98rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--shadow-orange);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(234, 88, 12, 0.3);
+            background: linear-gradient(135deg, var(--primary-hover), var(--primary));
+        }
+
+        /* Container */
+        .hero-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+            flex: 1;
+        }
+
+        @media (max-width: 900px) {
+            .hero-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+                margin: 20px auto;
+            }
+        }
+
+        /* Hero Text */
+        .hero-content h1 {
+            font-size: 3.2rem;
+            line-height: 1.15;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+        }
+
+        .hero-content h1 span {
+            color: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-content p {
+            color: var(--text-muted);
+            font-size: 1.15rem;
+            line-height: 1.65;
+            margin-bottom: 30px;
+        }
+
+        .badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: var(--primary-light);
+            border: 1px solid var(--card-border);
+            color: var(--primary);
+            border-radius: 20px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .feature-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 1.02rem;
+        }
+
+        .feature-icon {
+            width: 26px;
+            height: 26px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        /* Registration Form Card */
+        .form-card {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 20px;
+            padding: 38px;
+            box-shadow: 0 12px 35px var(--shadow-orange);
+            position: relative;
+        }
+
+        .form-card h2 {
+            font-size: 1.7rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .form-card p.subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background: #fffdfa;
+            border: 1.5px solid #fed7aa;
+            border-radius: 10px;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+            background: #ffffff;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            box-shadow: 0 5px 20px var(--shadow-orange);
+        }
+
+        .btn-submit:hover {
+            opacity: 0.95;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(234, 88, 12, 0.35);
+        }
+
+        .user-welcome-card {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .user-welcome-card h3 {
+            font-size: 1.6rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+
+        .user-welcome-card p {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            border-top: 1px solid var(--card-border);
+            margin-top: auto;
+            background: #ffffff;
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>Welcome to Codex Digital Academy</h1>
-        <p>Your journey to mastering digital skills starts here.</p>
-        <a href="register.html" class="btn">Step 1: Register</a>
-        <a href="course.html" class="btn">Step 2: Access Courses</a>
+
+    <!-- Header Navigation -->
+    <header>
+        <a href="index.html" class="logo">
+            📙 Codex <span>Digital Academy</span>
+        </a>
+        <div class="nav-actions">
+            <!-- Netlify Identity Buttons -->
+            <button class="btn-auth" id="btnLogin" onclick="netlifyIdentity.open('login')">Log In</button>
+            <button class="btn-auth" id="btnSignup" onclick="netlifyIdentity.open('signup')" style="background: var(--primary-light); color: var(--primary); border-color: var(--card-border);">Sign Up</button>
+            <a href="admin.html" class="btn-auth">📊 Admin</a>
+            <a href="course.html" class="btn-primary">Access Course →</a>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <div class="hero-container">
+        <!-- Left: Hero Overview -->
+        <div class="hero-content">
+            <div class="badge-pill">⚡ 7-Day Complete Digital Accelerator</div>
+            <h1>Master Digital Skills with <span>Codex Academy</span></h1>
+            <p>Access high-definition interactive course modules with zero lock restrictions. Track your progress and elevate your digital mastery today.</p>
+            
+            <ul class="feature-list">
+                <li class="feature-item">
+                    <span class="feature-icon">✓</span>
+                    <span>All 7 Course Modules Unlocked & Instant Access</span>
+                </li>
+                <li class="feature-item">
+                    <span class="feature-icon">✓</span>
+                    <span>Non-Skippable Video Player for Full Engagement</span>
+                </li>
+                <li class="feature-item">
+                    <span class="feature-icon">✓</span>
+                    <span>Auto Highest Quality HD Video Playback</span>
+                </li>
+                <li class="feature-item">
+                    <span class="feature-icon">✓</span>
+                    <span>Netlify Form & Email Data Extraction Ready</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Right: Registration Form with Netlify Connection -->
+        <div class="form-card">
+            <!-- Active User Display Card (If logged in / registered) -->
+            <div id="loggedInNotice" class="user-welcome-card">
+                <h3>Welcome Back, <span id="displayUserName">Student</span>!</h3>
+                <p id="displayUserEmail">You are authenticated. Ready to resume learning?</p>
+                <a href="course.html" class="btn-primary" style="width: 100%; justify-content: center;">Continue Course LMS →</a>
+                <button class="btn-auth" onclick="resetLocalUser()" style="margin-top: 15px; width: 100%;">Register Different User</button>
+            </div>
+
+            <!-- Netlify Form -->
+            <form name="course-registration" 
+                  method="POST" 
+                  data-netlify="true" 
+                  netlify-honeypot="bot-field" 
+                  id="registrationForm" 
+                  action="course.html" 
+                  onsubmit="handleRegistration(event)">
+
+                <!-- Hidden Honeypot for Netlify Spam Protection -->
+                <p style="display:none;">
+                    <label>Don’t fill this out if you're human: <input name="bot-field" /></label>
+                </p>
+
+                <!-- Hidden Form Name field for Netlify Form handling -->
+                <input type="hidden" name="form-name" value="course-registration" />
+
+                <h2>Enroll in Academy</h2>
+                <p class="subtitle">Fill out your 5 details below to unlock instant course access.</p>
+
+                <div class="form-group">
+                    <label for="studentName">Full Name *</label>
+                    <input type="text" id="studentName" name="name" class="form-control" placeholder="e.g. Rahul Sharma" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="studentEmail">Email Address *</label>
+                    <input type="email" id="studentEmail" name="email" class="form-control" placeholder="e.g. rahul@example.com" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="studentPhone">Phone / WhatsApp Number *</label>
+                    <input type="tel" id="studentPhone" name="phone" class="form-control" placeholder="e.g. +91 9876543210" required />
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="studentProfession">Profession *</label>
+                        <input type="text" id="studentProfession" name="profession" class="form-control" placeholder="e.g. Student / Developer" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="studentAge">Age *</label>
+                        <input type="number" id="studentAge" name="age" class="form-control" min="10" max="100" placeholder="e.g. 24" required />
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">Register & Access Course Now ⚡</button>
+            </form>
+        </div>
     </div>
+
+    <footer>
+        © 2026 Codex Digital Academy. Integrated with Netlify Forms & Netlify Identity Authentication.
+    </footer>
+
+    <script>
+        // --- Netlify Identity & Local Storage Integration ---
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuthState();
+
+            // Netlify Identity Event Listeners
+            if (window.netlifyIdentity) {
+                window.netlifyIdentity.on("init", user => {
+                    if (user) updateUIForUser(user);
+                });
+                window.netlifyIdentity.on("login", user => {
+                    updateUIForUser(user);
+                    window.netlifyIdentity.close();
+                });
+                window.netlifyIdentity.on("logout", () => {
+                    localStorage.removeItem('codexUser');
+                    location.reload();
+                });
+            }
+        });
+
+        function checkAuthState() {
+            const localUserRaw = localStorage.getItem('codexUser');
+            let user = null;
+
+            if (window.netlifyIdentity && window.netlifyIdentity.currentUser()) {
+                const netlifyUser = window.netlifyIdentity.currentUser();
+                user = {
+                    name: netlifyUser.user_metadata?.full_name || netlifyUser.email.split('@')[0],
+                    email: netlifyUser.email
+                };
+            } else if (localUserRaw) {
+                try { user = JSON.parse(localUserRaw); } catch(e){}
+            }
+
+            if (user) {
+                updateUIForUser(user);
+            }
+        }
+
+        function updateUIForUser(user) {
+            document.getElementById('registrationForm').style.display = 'none';
+            const notice = document.getElementById('loggedInNotice');
+            notice.style.display = 'block';
+            document.getElementById('displayUserName').innerText = user.name || 'Student';
+            document.getElementById('displayUserEmail').innerText = `Logged in as ${user.email}`;
+
+            const btnLogin = document.getElementById('btnLogin');
+            const btnSignup = document.getElementById('btnSignup');
+            if (btnLogin) btnLogin.innerText = 'Netlify User: ' + (user.name || 'Active');
+            if (btnSignup) {
+                btnSignup.innerText = 'Log Out';
+                btnSignup.onclick = () => {
+                    if (window.netlifyIdentity) window.netlifyIdentity.logout();
+                    localStorage.removeItem('codexUser');
+                    location.reload();
+                };
+            }
+        }
+
+        function handleRegistration(e) {
+            const name = document.getElementById('studentName').value;
+            const email = document.getElementById('studentEmail').value;
+            const phone = document.getElementById('studentPhone').value;
+            const profession = document.getElementById('studentProfession').value;
+            const age = document.getElementById('studentAge').value;
+
+            const userData = {
+                name,
+                email,
+                phone,
+                profession,
+                age,
+                registeredAt: Date.now()
+            };
+
+            localStorage.setItem('codexUser', JSON.stringify(userData));
+            localStorage.setItem('codexStartDate', Date.now());
+            
+            const form = e.target;
+            const formData = new FormData(form);
+
+            fetch("/", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams(formData).toString()
+            }).then(() => {
+                console.log("Form submitted to Netlify");
+                window.location.href = "course.html";
+            }).catch(error => {
+                console.warn("Fallback redirecting:", error);
+                window.location.href = "course.html";
+            });
+
+            e.preventDefault();
+        }
+
+        function resetLocalUser() {
+            localStorage.removeItem('codexUser');
+            localStorage.removeItem('codexStartDate');
+            document.getElementById('loggedInNotice').style.display = 'none';
+            document.getElementById('registrationForm').style.display = 'block';
+        }
+    </script>
 </body>
 </html>
+
+

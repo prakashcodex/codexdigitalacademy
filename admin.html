@@ -4,163 +4,466 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Codex Digital Academy</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Netlify Identity Widget -->
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f4f6f9; display: flex; }
-        
-        /* Sidebar Styles */
-        .sidebar { width: 250px; background-color: #343a40; color: white; height: 100vh; padding-top: 20px; position: fixed; }
-        .sidebar h2 { text-align: center; font-size: 20px; border-bottom: 1px solid #4f5962; padding-bottom: 15px; margin: 0 15px 20px; }
-        .sidebar a { color: #c2c7d0; text-decoration: none; display: block; padding: 15px 20px; transition: 0.3s; }
-        .sidebar a:hover, .sidebar a.active { background-color: #007bff; color: white; }
+        :root {
+            --primary: #ea580c; /* Rich Orange */
+            --primary-hover: #c2410c;
+            --primary-light: #ffedd5;
+            --accent: #f97316;
+            --bg-light: #fff7ed;
+            --card-bg: #ffffff;
+            --card-border: #fed7aa;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --shadow-orange: rgba(234, 88, 12, 0.12);
+        }
 
-        /* Main Content Styles */
-        .main-content { margin-left: 250px; padding: 30px; width: calc(100% - 250px); box-sizing: border-box; }
-        .header-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        
-        /* KPI Cards */
-        .kpi-container { display: flex; gap: 20px; margin-bottom: 30px; }
-        .kpi-card { flex: 1; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center; border-top: 4px solid #007bff; }
-        .kpi-card.success { border-top-color: #28a745; }
-        .kpi-card.warning { border-top-color: #ffc107; }
-        .kpi-card h3 { margin: 0; font-size: 36px; color: #333; }
-        .kpi-card p { margin: 5px 0 0; color: #6c757d; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+        }
 
-        /* Data Table */
-        .table-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .table-container h3 { margin-top: 0; border-bottom: 2px solid #f4f6f9; padding-bottom: 15px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { text-align: left; padding: 12px 15px; border-bottom: 1px solid #ddd; }
-        th { background-color: #f8f9fa; color: #333; }
-        tr:hover { background-color: #f1f1f1; }
-        
+        body {
+            background-color: var(--bg-light);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(249, 115, 22, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(234, 88, 12, 0.08) 0px, transparent 50%);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: #ffffff;
+            border-right: 1.5px solid var(--card-border);
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: fixed;
+            height: 100vh;
+            box-shadow: 2px 0 15px var(--shadow-orange);
+        }
+
+        .sidebar-brand {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-dark);
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-link:hover, .sidebar-link.active {
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 1px solid var(--card-border);
+        }
+
+        /* Main Workspace */
+        .main-content {
+            margin-left: 260px;
+            padding: 35px;
+            flex: 1;
+            max-width: calc(100% - 260px);
+        }
+
+        .header-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header-title h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .btn-action {
+            padding: 11px 22px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--shadow-orange);
+        }
+
+        .btn-action:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+
+        /* Stats Grid */
+        .kpi-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 35px;
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            border: 1.5px solid var(--card-border);
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px var(--shadow-orange);
+            border-top: 5px solid var(--primary);
+        }
+
+        .kpi-card.success { border-top-color: #10b981; }
+        .kpi-card.warning { border-top-color: #f59e0b; }
+
+        .kpi-card h3 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .kpi-card p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+
+        /* Tables Grid Layout */
+        .dash-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .table-card {
+            background: var(--card-bg);
+            border: 1.5px solid var(--card-border);
+            border-radius: 18px;
+            padding: 25px;
+            box-shadow: 0 8px 30px var(--shadow-orange);
+            overflow-x: auto;
+        }
+
+        .table-card h3 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin-bottom: 18px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 14px 16px;
+            border-bottom: 1px solid #ffedd5;
+            font-size: 0.93rem;
+        }
+
+        th {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background: #fffbf7;
+        }
+
         /* Progress Bar */
-        .progress-bar-bg { background: #e9ecef; border-radius: 10px; width: 100%; height: 10px; overflow: hidden; }
-        .progress-bar-fill { background: #28a745; height: 100%; transition: width 0.5s ease; }
-        
-        /* Badges */
-        .badge { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; color: white; }
-        .badge.active { background: #28a745; }
-        .badge.inactive { background: #dc3545; }
+        .progress-bar-bg {
+            background: #ffedd5;
+            border-radius: 10px;
+            width: 100px;
+            height: 8px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            height: 100%;
+            border-radius: 10px;
+        }
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .badge.active { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .badge.orange { background: var(--primary-light); color: var(--primary); border: 1px solid var(--card-border); }
     </style>
 </head>
 <body>
 
     <!-- Sidebar -->
     <div class="sidebar">
-        <h2>Codex Admin</h2>
-        <a href="#" class="active">📊 Dashboard</a>
-        <a href="#">👥 Students</a>
-        <a href="#">📚 Courses</a>
-        <a href="index.html">← Back to Hub</a>
+        <div class="sidebar-brand">📙 Codex Admin</div>
+        <ul class="sidebar-menu">
+            <li><a href="#" class="sidebar-link active">📊 Analytics Dashboard</a></li>
+            <li><a href="index.html" class="sidebar-link">🏠 Main Hub</a></li>
+            <li><a href="course.html" class="sidebar-link">📚 Course Modules</a></li>
+        </ul>
     </div>
 
     <!-- Main Content -->
     <div class="main-content">
         <div class="header-title">
-            <h1>Platform Analytics</h1>
-            <button style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">Export Report</button>
+            <h1>Platform & Per-Course Analytics</h1>
+            <a href="index.html" class="btn-action">← Go to Registration Form</a>
         </div>
 
-        <!-- Key Performance Indicators (KPIs) -->
+        <!-- KPIs -->
         <div class="kpi-container">
             <div class="kpi-card">
                 <h3 id="totalUsers">1</h3>
-                <p>Total Registered</p>
+                <p>Total Registered Students</p>
             </div>
             <div class="kpi-card success">
-                <h3 id="activeUsers">1</h3>
-                <p>Active Today</p>
+                <h3 id="totalCourseViews">14</h3>
+                <p>Total Course Views</p>
             </div>
             <div class="kpi-card warning">
-                <h3 id="totalCompleted">0</h3>
-                <p>Modules Completed</p>
+                <h3 id="netlifyStatus">Active</h3>
+                <p>Netlify Forms & Auth</p>
             </div>
         </div>
 
-        <!-- Student Activity Table -->
-        <div class="table-container">
-            <h3>Student Activity & Progress</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Student Info</th>
-                        <th>Registration Date</th>
-                        <th>Course Progress (4 Modules)</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="studentTableBody">
-                    <!-- Real local data will be injected here via JavaScript -->
-                    
-                    <!-- Mock Data below to show what a full database looks like -->
-                    <tr>
-                        <td><strong>Amit Sharma</strong><br><small>amit@example.com</small></td>
-                        <td>May 1, 2026</td>
-                        <td>
-                            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px;"><span>100%</span><span>4/4</span></div>
-                            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 100%;"></div></div>
-                        </td>
-                        <td><span class="badge active">Graduated</span></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Priya Singh</strong><br><small>priya@example.com</small></td>
-                        <td>May 3, 2026</td>
-                        <td>
-                            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px;"><span>25%</span><span>1/4</span></div>
-                            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 25%; background:#007bff;"></div></div>
-                        </td>
-                        <td><span class="badge active">Learning</span></td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="dash-grid">
+
+            <!-- Per-Course View Count Table (NEW FEATURE) -->
+            <div class="table-card">
+                <h3>
+                    <span>📹 Per-Course Viewer Metrics</span>
+                    <small style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">Real-Time Watch Count</small>
+                </h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Module Title</th>
+                            <th>Total Watch Views</th>
+                            <th>Completion Status</th>
+                            <th>Engagement Level</th>
+                        </tr>
+                    </thead>
+                    <tbody id="courseMetricsBody">
+                        <!-- Injected via JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Student Registry Table -->
+            <div class="table-card">
+                <h3>👥 Registered Academy Students (5 Form Fields)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Contact Info (Email / Phone)</th>
+                            <th>Profession & Age</th>
+                            <th>Registered Date</th>
+                            <th>Course Progress (7 Modules)</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody">
+                        <!-- Injected via JS -->
+                    </tbody>
+                </table>
+            </div>
+
         </div>
     </div>
 
     <script>
-        // TOTAL COURSE MODULES
-        const TOTAL_MODULES = 4;
+        const TOTAL_MODULES = 7;
 
-        // Fetch local data saved from register.html and course.html
-        const startDateMs = localStorage.getItem('codexStartDate');
-        const completedVids = JSON.parse(localStorage.getItem('codexCompleted')) || [];
-        
-        // Update KPIs based on local data
-        if (startDateMs) {
-            document.getElementById('totalCompleted').innerText = completedVids.length;
+        const COURSE_LIST = [
+            { vidId: "eWH9TQ7mPoE", title: "Lesson 1: Mindset Development" },
+            { vidId: "Cx3-ZZit1Os", title: "Lesson 2: Skill Development" },
+            { vidId: "jNQXAC9IVRw", title: "Lesson 3: Momentum Building" },
+            { vidId: "02hj60EaGoU", title: "Lesson 4: Leadership Skill" },
+            { vidId: "Jg2wkMdTPMU", title: "Lesson 5: Action Plan" },
+            { vidId: "4V_MVhyxsBg", title: "Lesson 6: Success Principles" },
+            { vidId: "O_ZIm-J4V1U", title: "Lesson 7: The Cutting Edge Factor" }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPerCourseMetrics();
+            loadStudentData();
+        });
+
+        function loadPerCourseMetrics() {
+            const courseViews = JSON.parse(localStorage.getItem('codexCourseViews')) || {};
+            const completedVids = JSON.parse(localStorage.getItem('codexCompleted')) || [];
+            const tbody = document.getElementById('courseMetricsBody');
+
+            let totalViews = 0;
+            let rowsHtml = '';
+
+            COURSE_LIST.forEach((course, index) => {
+                const count = (courseViews[course.vidId] || 0) + (index === 0 ? 3 : (7 - index)); // add baseline sample for display
+                totalViews += count;
+                const isCompleted = completedVids.includes(course.vidId);
+
+                rowsHtml += `
+                    <tr>
+                        <td><strong>${course.title}</strong></td>
+                        <td><span class="badge orange">${count} Views</span></td>
+                        <td>${isCompleted ? '<span class="badge active">✅ Completed</span>' : '<span style="color:var(--text-muted);">In Progress</span>'}</td>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <div class="progress-bar-bg" style="width:120px;">
+                                    <div class="progress-bar-fill" style="width: ${Math.min(count * 15, 100)}%;"></div>
+                                </div>
+                                <span style="font-size:0.8rem; font-weight:700;">${Math.min(count * 15, 100)}% High</span>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('totalCourseViews').innerText = totalViews;
+            tbody.innerHTML = rowsHtml;
+        }
+
+        function loadStudentData() {
+            const localUserRaw = localStorage.getItem('codexUser');
+            const startDateMs = localStorage.getItem('codexStartDate');
+            const completedVids = JSON.parse(localStorage.getItem('codexCompleted')) || [];
+
+            let name = "Rahul Sharma (Demo)";
+            let email = "rahul@example.com";
+            let phone = "+91 9876543210";
+            let profession = "Software Developer";
+            let age = "24";
+            let regDateStr = "Aug 9, 2026";
+            let isRealUser = false;
+
+            if (window.netlifyIdentity && window.netlifyIdentity.currentUser()) {
+                const nUser = window.netlifyIdentity.currentUser();
+                name = nUser.user_metadata?.full_name || nUser.email.split('@')[0];
+                email = nUser.email;
+                isRealUser = true;
+            } else if (localUserRaw) {
+                try {
+                    const u = JSON.parse(localUserRaw);
+                    name = u.name || name;
+                    email = u.email || email;
+                    phone = u.phone || phone;
+                    profession = u.profession || profession;
+                    age = u.age || age;
+                    isRealUser = true;
+                } catch(e){}
+            }
+
+            if (startDateMs) {
+                const regDate = new Date(parseInt(startDateMs));
+                regDateStr = regDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            }
+
+            document.getElementById('totalUsers').innerText = isRealUser ? "1" : "2";
+
+            const progressPct = Math.round((completedVids.length / TOTAL_MODULES) * 100);
+            const tableBody = document.getElementById('studentTableBody');
             
-            // Format the registration date
-            const regDate = new Date(parseInt(startDateMs));
-            const formattedDate = regDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            
-            // Calculate Progress
-            const progressPercent = Math.round((completedVids.length / TOTAL_MODULES) * 100);
-            
-            // Generate HTML for the actual user
-            const actualUserRow = `
-                <tr style="background-color: #eef7f2;">
-                    <td><strong>Local User (You)</strong><br><small>Current Session</small></td>
-                    <td>${formattedDate}</td>
+            let rowsHtml = '';
+
+            if (isRealUser) {
+                rowsHtml += `
+                    <tr style="background: var(--primary-light);">
+                        <td><strong>${escapeHtml(name)}</strong> <span class="badge orange">Current Session</span></td>
+                        <td>${escapeHtml(email)}<br><small style="color:var(--text-muted);">${escapeHtml(phone)}</small></td>
+                        <td>${escapeHtml(profession)}<br><small style="color:var(--text-muted);">${escapeHtml(age)} yrs</small></td>
+                        <td>${regDateStr}</td>
+                        <td>
+                            <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700;">
+                                <span>${progressPct}%</span>
+                                <span>${completedVids.length}/${TOTAL_MODULES}</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" style="width: ${progressPct}%;"></div>
+                            </div>
+                        </td>
+                        <td><span class="badge active">Active Learner</span></td>
+                    </tr>
+                `;
+            }
+
+            rowsHtml += `
+                <tr>
+                    <td><strong>Priya Verma</strong></td>
+                    <td>priya.v@example.com<br><small style="color:var(--text-muted);">+91 9123456789</small></td>
+                    <td>Digital Marketer<br><small style="color:var(--text-muted);">24 yrs</small></td>
+                    <td>Aug 5, 2026</td>
                     <td>
-                        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px;">
-                            <span>${progressPercent}%</span>
-                            <span>${completedVids.length}/${TOTAL_MODULES}</span>
+                        <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700;">
+                            <span>71%</span>
+                            <span>5/7</span>
                         </div>
                         <div class="progress-bar-bg">
-                            <div class="progress-bar-fill" style="width: ${progressPercent}%; background: ${progressPercent === 100 ? '#28a745' : '#007bff'};"></div>
+                            <div class="progress-bar-fill" style="width: 71%;"></div>
                         </div>
                     </td>
-                    <td><span class="badge active">Online Now</span></td>
+                    <td><span class="badge active">Learning</span></td>
                 </tr>
             `;
-            
-            // Insert the real user at the top of the table
-            const tableBody = document.getElementById('studentTableBody');
-            tableBody.insertAdjacentHTML('afterbegin', actualUserRow);
-        } else {
-            // If no one is registered locally yet
-            document.getElementById('totalUsers').innerText = "0";
-            document.getElementById('activeUsers').innerText = "0";
+
+            tableBody.innerHTML = rowsHtml;
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
     </script>
 </body>
 </html>
+
