@@ -239,9 +239,147 @@
 
         .badge.active { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
         .badge.orange { background: var(--primary-light); color: var(--primary); border: 1px solid var(--card-border); }
+
+        /* Admin Auth Login Modal Overlay */
+        .admin-auth-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .admin-auth-card {
+            background: #ffffff;
+            border: 2px solid var(--card-border);
+            border-radius: 24px;
+            padding: 42px 36px;
+            width: 92%;
+            max-width: 440px;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+        }
+
+        .admin-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+
+        .admin-auth-card h2 {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+
+        .admin-auth-card p.subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+        }
+
+        .admin-input-group {
+            text-align: left;
+            margin-bottom: 16px;
+        }
+
+        .admin-input-group label {
+            display: block;
+            font-size: 0.88rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text-dark);
+        }
+
+        .admin-input {
+            width: 100%;
+            padding: 13px 16px;
+            background: #fffdfa;
+            border: 1.5px solid #fed7aa;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .admin-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+            background: #ffffff;
+        }
+
+        .login-err-msg {
+            color: #e11d48;
+            font-weight: 700;
+            font-size: 0.86rem;
+            margin-bottom: 15px;
+            display: none;
+            background: #ffe4e6;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #fecdd3;
+        }
+
+        .btn-admin-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--shadow-orange);
+        }
+
+        .btn-admin-login:hover {
+            opacity: 0.95;
+            transform: translateY(-2px);
+        }
+
+        .back-link-admin {
+            display: inline-block;
+            margin-top: 18px;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .back-link-admin:hover {
+            color: var(--primary);
+        }
     </style>
 </head>
 <body>
+
+    <!-- Admin Authentication Required Overlay Modal -->
+    <div class="admin-auth-overlay" id="adminAuthModal">
+        <div class="admin-auth-card">
+            <div class="admin-icon">🔐</div>
+            <h2>Admin Login</h2>
+            <p class="subtitle">Enter your admin credentials to access platform analytics.</p>
+            
+            <form onsubmit="handleAdminLogin(event)">
+                <div class="admin-input-group">
+                    <label for="adminUser">Username *</label>
+                    <input type="text" id="adminUser" class="admin-input" placeholder="Username (admin)" required />
+                </div>
+                <div class="admin-input-group">
+                    <label for="adminPass">Password *</label>
+                    <input type="password" id="adminPass" class="admin-input" placeholder="Password (123456)" required />
+                </div>
+                <div id="adminLoginErr" class="login-err-msg">❌ Invalid Username or Password</div>
+                <button type="submit" class="btn-admin-login">Log In to Dashboard →</button>
+            </form>
+            <a href="index.html" class="back-link-admin">← Return to Main Page</a>
+        </div>
+    </div>
 
     <!-- Sidebar -->
     <div class="sidebar">
@@ -250,6 +388,7 @@
             <li><a href="#" class="sidebar-link active">📊 Analytics Dashboard</a></li>
             <li><a href="index.html" class="sidebar-link">🏠 Main Hub</a></li>
             <li><a href="course.html" class="sidebar-link">📚 Course Modules</a></li>
+            <li><a href="#" class="sidebar-link" onclick="adminLogout()" style="color:#e11d48; margin-top:20px;">🚪 Admin Logout</a></li>
         </ul>
     </div>
 
@@ -257,32 +396,35 @@
     <div class="main-content">
         <div class="header-title">
             <h1>Platform & Per-Course Analytics</h1>
-            <a href="index.html" class="btn-action">← Go to Registration Form</a>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-action" onclick="adminLogout()" style="background:#dc2626;">🚪 Log Out</button>
+                <a href="index.html" class="btn-action">← Go to Registration Form</a>
+            </div>
         </div>
 
         <!-- KPIs -->
         <div class="kpi-container">
             <div class="kpi-card">
-                <h3 id="totalUsers">1</h3>
-                <p>Total Registered Students</p>
+                <h3 id="totalUsers">0</h3>
+                <p>Real Registered Students</p>
             </div>
             <div class="kpi-card success">
-                <h3 id="totalCourseViews">14</h3>
-                <p>Total Course Views</p>
+                <h3 id="totalCourseViews">0</h3>
+                <p>Real Course Watch Views</p>
             </div>
             <div class="kpi-card warning">
-                <h3 id="netlifyStatus">Active</h3>
-                <p>Netlify Forms & Auth</p>
+                <h3 id="netlifyStatus">Live Real-Time</h3>
+                <p>Data Source Status</p>
             </div>
         </div>
 
         <div class="dash-grid">
 
-            <!-- Per-Course View Count Table (NEW FEATURE) -->
+            <!-- Per-Course View Count Table (REAL METRICS ONLY) -->
             <div class="table-card">
                 <h3>
                     <span>📹 Per-Course Viewer Metrics</span>
-                    <small style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">Real-Time Watch Count</small>
+                    <small style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">Real Watch Analytics</small>
                 </h3>
                 <table>
                     <thead>
@@ -301,7 +443,7 @@
 
             <!-- Student Registry Table -->
             <div class="table-card">
-                <h3>👥 Registered Academy Students (5 Form Fields)</h3>
+                <h3>👥 Real Registered Students (Live Form Data)</h3>
                 <table>
                     <thead>
                         <tr>
@@ -328,18 +470,51 @@
         const COURSE_LIST = [
             { vidId: "eWH9TQ7mPoE", title: "Lesson 1: Mindset Development" },
             { vidId: "Cx3-ZZit1Os", title: "Lesson 2: Skill Development" },
-            { vidId: "jNQXAC9IVRw", title: "Lesson 3: Momentum Building" },
-            { vidId: "02hj60EaGoU", title: "Lesson 4: Leadership Skill" },
-            { vidId: "Jg2wkMdTPMU", title: "Lesson 5: Action Plan" },
-            { vidId: "4V_MVhyxsBg", title: "Lesson 6: Success Principles" },
+            { vidId: "02hj60EaGoU", title: "Lesson 3: Momentum Building" },
+            { vidId: "Jg2wkMdTPMU", title: "Lesson 4: Leadership Skill" },
+            { vidId: "4V_MVhyxsBg", title: "Lesson 5: Action Plan" },
+            { vidId: "k825543DAm4", title: "Lesson 6: Success Principles" },
             { vidId: "O_ZIm-J4V1U", title: "Lesson 7: The Cutting Edge Factor" }
         ];
 
         document.addEventListener('DOMContentLoaded', () => {
-            loadPerCourseMetrics();
-            loadStudentData();
+            checkAdminAccess();
         });
 
+        function checkAdminAccess() {
+            const isAuth = sessionStorage.getItem('codexAdminAuth') === 'true';
+            const modal = document.getElementById('adminAuthModal');
+            if (isAuth) {
+                modal.style.display = 'none';
+                loadPerCourseMetrics();
+                loadStudentData();
+            } else {
+                modal.style.display = 'flex';
+            }
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const userVal = document.getElementById('adminUser').value.trim();
+            const passVal = document.getElementById('adminPass').value.trim();
+            const errDiv = document.getElementById('adminLoginErr');
+
+            if (userVal.toLowerCase() === 'admin' && passVal === '123456') {
+                sessionStorage.setItem('codexAdminAuth', 'true');
+                errDiv.style.display = 'none';
+                checkAdminAccess();
+            } else {
+                errDiv.style.display = 'block';
+                errDiv.innerText = '❌ Invalid Username or Password (use: admin / 123456)';
+            }
+        }
+
+        function adminLogout() {
+            sessionStorage.removeItem('codexAdminAuth');
+            location.reload();
+        }
+
+        // PURE 100% REAL DATA METRICS (NO DEMO / FAKE NUMBERS)
         function loadPerCourseMetrics() {
             const courseViews = JSON.parse(localStorage.getItem('codexCourseViews')) || {};
             const completedVids = JSON.parse(localStorage.getItem('codexCompleted')) || [];
@@ -348,22 +523,23 @@
             let totalViews = 0;
             let rowsHtml = '';
 
-            COURSE_LIST.forEach((course, index) => {
-                const count = (courseViews[course.vidId] || 0) + (index === 0 ? 3 : (7 - index)); // add baseline sample for display
+            COURSE_LIST.forEach((course) => {
+                const count = courseViews[course.vidId] || 0; // Pure REAL watch views
                 totalViews += count;
                 const isCompleted = completedVids.includes(course.vidId);
+                const pct = count > 0 ? Math.min(count * 25, 100) : 0;
 
                 rowsHtml += `
                     <tr>
                         <td><strong>${course.title}</strong></td>
                         <td><span class="badge orange">${count} Views</span></td>
-                        <td>${isCompleted ? '<span class="badge active">✅ Completed</span>' : '<span style="color:var(--text-muted);">In Progress</span>'}</td>
+                        <td>${isCompleted ? '<span class="badge active">✅ Completed</span>' : '<span style="color:var(--text-muted);">Not Completed</span>'}</td>
                         <td>
                             <div style="display:flex; align-items:center; gap:8px;">
                                 <div class="progress-bar-bg" style="width:120px;">
-                                    <div class="progress-bar-fill" style="width: ${Math.min(count * 15, 100)}%;"></div>
+                                    <div class="progress-bar-fill" style="width: ${pct}%;"></div>
                                 </div>
-                                <span style="font-size:0.8rem; font-weight:700;">${Math.min(count * 15, 100)}% High</span>
+                                <span style="font-size:0.8rem; font-weight:700;">${pct}%</span>
                             </div>
                         </td>
                     </tr>
@@ -374,54 +550,53 @@
             tbody.innerHTML = rowsHtml;
         }
 
+        // PURE 100% REAL REGISTERED STUDENT DATA ONLY
         function loadStudentData() {
-            const localUserRaw = localStorage.getItem('codexUser');
-            const startDateMs = localStorage.getItem('codexStartDate');
-            const completedVids = JSON.parse(localStorage.getItem('codexCompleted')) || [];
+            let allUsers = JSON.parse(localStorage.getItem('codexAllUsers')) || [];
+            const singleUserRaw = localStorage.getItem('codexUser');
 
-            let name = "Rahul Sharma (Demo)";
-            let email = "rahul@example.com";
-            let phone = "+91 9876543210";
-            let profession = "Software Developer";
-            let age = "24";
-            let regDateStr = "Aug 9, 2026";
-            let isRealUser = false;
-
-            if (window.netlifyIdentity && window.netlifyIdentity.currentUser()) {
-                const nUser = window.netlifyIdentity.currentUser();
-                name = nUser.user_metadata?.full_name || nUser.email.split('@')[0];
-                email = nUser.email;
-                isRealUser = true;
-            } else if (localUserRaw) {
+            // Sync single registered user if not in array
+            if (singleUserRaw) {
                 try {
-                    const u = JSON.parse(localUserRaw);
-                    name = u.name || name;
-                    email = u.email || email;
-                    phone = u.phone || phone;
-                    profession = u.profession || profession;
-                    age = u.age || age;
-                    isRealUser = true;
+                    const u = JSON.parse(singleUserRaw);
+                    if (u && u.name) {
+                        const exists = allUsers.some(x => (x.phone && u.phone && x.phone === u.phone) || (x.email && u.email && x.email === u.email));
+                        if (!exists) {
+                            allUsers.push(u);
+                            localStorage.setItem('codexAllUsers', JSON.stringify(allUsers));
+                        }
+                    }
                 } catch(e){}
             }
 
-            if (startDateMs) {
-                const regDate = new Date(parseInt(startDateMs));
-                regDateStr = regDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const completedVids = JSON.parse(localStorage.getItem('codexCompleted')) || [];
+            const tableBody = document.getElementById('studentTableBody');
+            document.getElementById('totalUsers').innerText = allUsers.length;
+
+            if (allUsers.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align:center; padding: 30px; color: var(--text-muted);">
+                            ℹ️ <strong>No registered students yet.</strong><br>
+                            Register a new student on the <a href="register.html" style="color:var(--primary); font-weight:700;">Register Page</a> to view real-time data here.
+                        </td>
+                    </tr>
+                `;
+                return;
             }
 
-            document.getElementById('totalUsers').innerText = isRealUser ? "1" : "2";
-
-            const progressPct = Math.round((completedVids.length / TOTAL_MODULES) * 100);
-            const tableBody = document.getElementById('studentTableBody');
-            
             let rowsHtml = '';
+            allUsers.forEach((u) => {
+                const progressPct = Math.round((completedVids.length / TOTAL_MODULES) * 100);
+                const regDateStr = u.registeredAt 
+                    ? new Date(u.registeredAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                    : 'Recently';
 
-            if (isRealUser) {
                 rowsHtml += `
-                    <tr style="background: var(--primary-light);">
-                        <td><strong>${escapeHtml(name)}</strong> <span class="badge orange">Current Session</span></td>
-                        <td>${escapeHtml(email)}<br><small style="color:var(--text-muted);">${escapeHtml(phone)}</small></td>
-                        <td>${escapeHtml(profession)}<br><small style="color:var(--text-muted);">${escapeHtml(age)} yrs</small></td>
+                    <tr>
+                        <td><strong>${escapeHtml(u.name || 'Student')}</strong></td>
+                        <td>${escapeHtml(u.email || 'N/A')}<br><small style="color:var(--text-muted);">${escapeHtml(u.phone || 'N/A')}</small></td>
+                        <td>${escapeHtml(u.profession || 'N/A')}<br><small style="color:var(--text-muted);">${escapeHtml(u.age ? u.age + ' yrs' : 'N/A')}</small></td>
                         <td>${regDateStr}</td>
                         <td>
                             <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700;">
@@ -435,33 +610,14 @@
                         <td><span class="badge active">Active Learner</span></td>
                     </tr>
                 `;
-            }
-
-            rowsHtml += `
-                <tr>
-                    <td><strong>Priya Verma</strong></td>
-                    <td>priya.v@example.com<br><small style="color:var(--text-muted);">+91 9123456789</small></td>
-                    <td>Digital Marketer<br><small style="color:var(--text-muted);">24 yrs</small></td>
-                    <td>Aug 5, 2026</td>
-                    <td>
-                        <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700;">
-                            <span>71%</span>
-                            <span>5/7</span>
-                        </div>
-                        <div class="progress-bar-bg">
-                            <div class="progress-bar-fill" style="width: 71%;"></div>
-                        </div>
-                    </td>
-                    <td><span class="badge active">Learning</span></td>
-                </tr>
-            `;
+            });
 
             tableBody.innerHTML = rowsHtml;
         }
 
         function escapeHtml(str) {
             if (!str) return '';
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
     </script>
 </body>

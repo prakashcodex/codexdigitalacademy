@@ -169,7 +169,7 @@
             border: 0;
         }
 
-        /* Top Overlay to obscure any YouTube branding top bar */
+        /* Top Overlay & Click Blocker to obscure YouTube links & prevent navigating to YouTube */
         .yt-branding-shield {
             position: absolute;
             top: 0;
@@ -179,6 +179,17 @@
             z-index: 10;
             pointer-events: none;
             background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 100%);
+        }
+
+        .yt-click-blocker {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 20;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0);
         }
 
         /* Controls Bar (Non-skippable setup) */
@@ -492,6 +503,8 @@
                     <div class="yt-branding-shield"></div>
                     <div class="iframe-wrapper">
                         <div id="player"></div>
+                        <!-- YouTube Click Interceptor Overlay (Blocks YT redirects & allows click-to-play) -->
+                        <div class="yt-click-blocker" id="videoClickOverlay" title="Click video to Play / Pause"></div>
                     </div>
                     
                     <!-- Player Controls -->
@@ -499,10 +512,11 @@
                         <div class="controls-group">
                             <button class="btn-control primary-btn" id="playPause">▶ Play</button>
                             <button class="btn-control" id="skipBack">⏪ -10s</button>
+                            <button class="btn-control" id="skipForward">⏩ +10s</button>
                             <button class="btn-control" id="restart">🔄 Restart</button>
                         </div>
                         <div class="non-skippable-tag">
-                            🛡️ Non-Skippable Player (HD Forced)
+                            🛡️ YouTube Links Disabled (10s Skip & Custom Controls)
                         </div>
                     </div>
                 </div>
@@ -749,31 +763,54 @@
             }
         }
 
+        function togglePlayPauseState() {
+            if (!player) return;
+            const state = typeof player.getPlayerState === 'function' ? player.getPlayerState() : -1;
+            if (state === YT.PlayerState.PLAYING) {
+                player.pauseVideo();
+                playPauseBtn.innerText = '▶ Play';
+                isPlaying = false;
+            } else {
+                player.playVideo();
+                forceHighestQuality();
+                playPauseBtn.innerText = '⏸ Pause';
+                isPlaying = true;
+            }
+        }
+
         function onPlayerReady(event) {
             forceHighestQuality();
             trackLessonView(currentVideoId, activeLessonTitle);
 
-            // Custom Non-skippable controls
-            playPauseBtn.addEventListener('click', function() {
-                if (!player) return;
-                const state = player.getPlayerState();
-                if (state === YT.PlayerState.PLAYING) {
-                    player.pauseVideo();
-                    this.innerText = '▶ Play';
-                    isPlaying = false;
-                } else {
-                    player.playVideo();
-                    forceHighestQuality();
-                    this.innerText = '⏸ Pause';
-                    isPlaying = true;
-                }
-            });
+            // Overlay Interceptor Click (Blocks YT external link clicks and toggles play/pause)
+            const videoOverlay = document.getElementById('videoClickOverlay');
+            if (videoOverlay) {
+                videoOverlay.addEventListener('click', togglePlayPauseState);
+            }
+
+            // Custom controls
+            playPauseBtn.addEventListener('click', togglePlayPauseState);
 
             document.getElementById('skipBack').addEventListener('click', () => {
                 if (player && typeof player.getCurrentTime === 'function') {
-                    player.seekTo(Math.max(player.getCurrentTime() - 10, 0), true);
+                    const curr = player.getCurrentTime();
+                    const newTime = Math.max(curr - 10, 0);
+                    player.seekTo(newTime, true);
                 }
             });
+
+            const skipForwardBtn = document.getElementById('skipForward');
+            if (skipForwardBtn) {
+                skipForwardBtn.addEventListener('click', () => {
+                    if (player && typeof player.getCurrentTime === 'function') {
+                        const curr = player.getCurrentTime();
+                        const duration = typeof player.getDuration === 'function' ? player.getDuration() : curr + 10;
+                        const newTime = Math.min(curr + 10, duration);
+                        maxWatchedTime = Math.max(maxWatchedTime, newTime);
+                        player.seekTo(newTime, true);
+                    }
+                });
+            }
 
             document.getElementById('restart').addEventListener('click', () => {
                 if (player && typeof player.seekTo === 'function') {
@@ -786,16 +823,11 @@
                 }
             });
 
-            // Enforce Non-Skippable Guard: prevent seeking forward past maxWatchedTime
+            // Keep maxWatchedTime updated as video plays naturally
             setInterval(() => {
                 if (player && isPlaying && typeof player.getCurrentTime === 'function') {
                     const curr = player.getCurrentTime();
-                    if (curr > maxWatchedTime + 2.5) {
-                        // User attempted forward skip! Seek back to highest watched timestamp
-                        player.seekTo(maxWatchedTime, true);
-                    } else {
-                        maxWatchedTime = Math.max(maxWatchedTime, curr);
-                    }
+                    maxWatchedTime = Math.max(maxWatchedTime, curr);
                 }
             }, 300);
         }

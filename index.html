@@ -267,6 +267,19 @@
             gap: 15px;
         }
 
+        @keyframes moveLeftRight {
+            0% { transform: translateX(-22px); }
+            50% { transform: translateX(22px); }
+            100% { transform: translateX(-22px); }
+        }
+
+        .btn-wrapper {
+            width: 100%;
+            padding: 10px 0;
+            display: flex;
+            justify-content: center;
+        }
+
         .btn-submit {
             width: 100%;
             padding: 15px;
@@ -277,15 +290,34 @@
             font-weight: 700;
             font-size: 1.05rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
             margin-top: 10px;
             box-shadow: 0 5px 20px var(--shadow-orange);
+            display: block;
         }
 
-        .btn-submit:hover {
+        .btn-submit.unfilled-animated {
+            animation: moveLeftRight 1.1s infinite ease-in-out !important;
+            opacity: 0.75;
+            cursor: not-allowed !important;
+            background: linear-gradient(135deg, #94a3b8, #64748b) !important;
+            box-shadow: 0 4px 12px rgba(100, 116, 139, 0.2) !important;
+            pointer-events: none !important;
+        }
+
+        .btn-submit:hover:not(.unfilled-animated) {
             opacity: 0.95;
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(234, 88, 12, 0.35);
+        }
+
+        .form-hint {
+            text-align: center;
+            font-size: 0.84rem;
+            color: var(--primary);
+            font-weight: 700;
+            margin-top: 8px;
+            transition: all 0.3s ease;
         }
 
         .user-welcome-card {
@@ -419,7 +451,10 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-submit">Register & Access Course Now ⚡</button>
+                <div class="btn-wrapper">
+                    <button type="submit" class="btn-submit unfilled-animated" id="mainRegSubmitBtn" disabled>Register & Access Course Now ⚡</button>
+                </div>
+                <p class="form-hint" id="mainFormHint">🔒 Fill Name & Phone Number to unlock Register button</p>
             </form>
         </div>
     </div>
@@ -429,9 +464,42 @@
     </footer>
 
     <script>
+        const studentName = document.getElementById('studentName');
+        const studentPhone = document.getElementById('studentPhone');
+        const mainRegSubmitBtn = document.getElementById('mainRegSubmitBtn');
+        const mainFormHint = document.getElementById('mainFormHint');
+
+        function validateMainForm() {
+            if (!studentName || !studentPhone || !mainRegSubmitBtn) return;
+            const hasName = studentName.value.trim().length > 0;
+            const hasPhone = studentPhone.value.trim().length > 0;
+
+            if (hasName && hasPhone) {
+                mainRegSubmitBtn.disabled = false;
+                mainRegSubmitBtn.classList.remove('unfilled-animated');
+                if (mainFormHint) {
+                    mainFormHint.style.color = '#16a34a';
+                    mainFormHint.innerText = '✅ Name & Number entered! Click Register to continue.';
+                }
+            } else {
+                mainRegSubmitBtn.disabled = true;
+                mainRegSubmitBtn.classList.add('unfilled-animated');
+                if (mainFormHint) {
+                    mainFormHint.style.color = '#ea580c';
+                    mainFormHint.innerText = '🔒 Fill Name & Phone Number to unlock Register button';
+                }
+            }
+        }
+
+        if (studentName && studentPhone) {
+            studentName.addEventListener('input', validateMainForm);
+            studentPhone.addEventListener('input', validateMainForm);
+        }
+
         // --- Netlify Identity & Local Storage Integration ---
         document.addEventListener('DOMContentLoaded', () => {
             checkAuthState();
+            validateMainForm();
 
             // Netlify Identity Event Listeners
             if (window.netlifyIdentity) {
@@ -489,11 +557,17 @@
         }
 
         function handleRegistration(e) {
-            const name = document.getElementById('studentName').value;
+            const name = studentName ? studentName.value : '';
             const email = document.getElementById('studentEmail').value;
-            const phone = document.getElementById('studentPhone').value;
+            const phone = studentPhone ? studentPhone.value : '';
             const profession = document.getElementById('studentProfession').value;
             const age = document.getElementById('studentAge').value;
+
+            if (!name || !phone) {
+                e.preventDefault();
+                alert("Please fill in both Name and Phone Number.");
+                return false;
+            }
 
             const userData = {
                 name,
@@ -507,6 +581,16 @@
             localStorage.setItem('codexUser', JSON.stringify(userData));
             localStorage.setItem('codexStartDate', Date.now());
             
+            // Save to codexAllUsers array for Admin Panel
+            let allUsers = JSON.parse(localStorage.getItem('codexAllUsers')) || [];
+            const existingIndex = allUsers.findIndex(u => (phone && u.phone === phone) || (email && u.email === email));
+            if (existingIndex >= 0) {
+                allUsers[existingIndex] = userData;
+            } else {
+                allUsers.push(userData);
+            }
+            localStorage.setItem('codexAllUsers', JSON.stringify(allUsers));
+
             const form = e.target;
             const formData = new FormData(form);
 
@@ -530,6 +614,7 @@
             localStorage.removeItem('codexStartDate');
             document.getElementById('loggedInNotice').style.display = 'none';
             document.getElementById('registrationForm').style.display = 'block';
+            validateMainForm();
         }
     </script>
 </body>

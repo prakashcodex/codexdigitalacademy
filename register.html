@@ -104,6 +104,19 @@
             gap: 15px;
         }
 
+        .btn-wrapper {
+            width: 100%;
+            padding: 10px 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        @keyframes moveLeftRight {
+            0% { transform: translateX(-22px); }
+            50% { transform: translateX(22px); }
+            100% { transform: translateX(-22px); }
+        }
+
         .btn-submit {
             width: 100%;
             padding: 15px;
@@ -114,14 +127,32 @@
             font-weight: 700;
             font-size: 1.02rem;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 10px;
+            transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
             box-shadow: 0 4px 15px var(--shadow-orange);
+            display: block;
         }
 
-        .btn-submit:hover {
+        .btn-submit.unfilled-animated {
+            animation: moveLeftRight 1.1s infinite ease-in-out !important;
+            opacity: 0.75;
+            cursor: not-allowed !important;
+            background: linear-gradient(135deg, #94a3b8, #64748b) !important;
+            box-shadow: 0 4px 12px rgba(100, 116, 139, 0.2) !important;
+            pointer-events: none !important;
+        }
+
+        .btn-submit:hover:not(.unfilled-animated) {
             opacity: 0.95;
             transform: translateY(-2px);
+        }
+
+        .form-hint {
+            text-align: center;
+            font-size: 0.84rem;
+            color: var(--primary);
+            font-weight: 700;
+            margin-top: 8px;
+            transition: all 0.3s ease;
         }
 
         .back-link {
@@ -143,7 +174,7 @@
 
     <div class="form-box">
         <h2>Student Registration</h2>
-        <p class="subtitle">Enter your 5 details to register & access all 7 LMS modules.</p>
+        <p class="subtitle">Enter your details below to register & access all LMS modules.</p>
 
         <!-- Netlify Form -->
         <form name="course-registration" 
@@ -171,7 +202,7 @@
             </div>
 
             <div class="form-group">
-                <label for="regPhone">Phone Number *</label>
+                <label for="regPhone">Phone / WhatsApp Number *</label>
                 <input type="tel" id="regPhone" name="phone" class="form-control" placeholder="Phone Number" required />
             </div>
 
@@ -186,19 +217,56 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn-submit">Enroll & Access Course Now ⚡</button>
+            <div class="btn-wrapper" id="btnWrapper">
+                <button type="submit" class="btn-submit unfilled-animated" id="regSubmitBtn" disabled>Enroll & Access Course Now ⚡</button>
+            </div>
+            <p class="form-hint" id="formHint">🔒 Fill Name & Number to unlock Register button</p>
         </form>
 
         <a href="index.html" class="back-link">← Return to Main Page</a>
     </div>
 
     <script>
+        const regName = document.getElementById('regName');
+        const regPhone = document.getElementById('regPhone');
+        const regSubmitBtn = document.getElementById('regSubmitBtn');
+        const formHint = document.getElementById('formHint');
+
+        function validateRegisterForm() {
+            const hasName = regName.value.trim().length > 0;
+            const hasPhone = regPhone.value.trim().length > 0;
+
+            if (hasName && hasPhone) {
+                regSubmitBtn.disabled = false;
+                regSubmitBtn.classList.remove('unfilled-animated');
+                formHint.style.color = '#16a34a';
+                formHint.innerText = '✅ Name & Number entered! Click Register to continue.';
+            } else {
+                regSubmitBtn.disabled = true;
+                regSubmitBtn.classList.add('unfilled-animated');
+                formHint.style.color = '#ea580c';
+                formHint.innerText = '🔒 Fill Name & Number to unlock Register button';
+            }
+        }
+
+        regName.addEventListener('input', validateRegisterForm);
+        regPhone.addEventListener('input', validateRegisterForm);
+        
+        // Check on load
+        document.addEventListener('DOMContentLoaded', validateRegisterForm);
+
         function submitRegistration(e) {
-            const name = document.getElementById('regName').value;
+            const name = regName.value;
             const email = document.getElementById('regEmail').value;
-            const phone = document.getElementById('regPhone').value;
+            const phone = regPhone.value;
             const profession = document.getElementById('regProfession').value;
             const age = document.getElementById('regAge').value;
+
+            if (!name || !phone) {
+                e.preventDefault();
+                alert("Please fill in both Name and Phone Number.");
+                return false;
+            }
 
             const userData = {
                 name, email, phone, profession, age,
@@ -207,6 +275,16 @@
 
             localStorage.setItem('codexUser', JSON.stringify(userData));
             localStorage.setItem('codexStartDate', Date.now());
+
+            // Save to codexAllUsers array for Admin Panel
+            let allUsers = JSON.parse(localStorage.getItem('codexAllUsers')) || [];
+            const existingIndex = allUsers.findIndex(u => (phone && u.phone === phone) || (email && u.email === email));
+            if (existingIndex >= 0) {
+                allUsers[existingIndex] = userData;
+            } else {
+                allUsers.push(userData);
+            }
+            localStorage.setItem('codexAllUsers', JSON.stringify(allUsers));
 
             const form = e.target;
             const formData = new FormData(form);
